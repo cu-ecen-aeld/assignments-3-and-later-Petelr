@@ -15,6 +15,11 @@ exist. Exits with value 1 and error print statement if the
 file could not be created.
 */
 #include <stdio.h>
+#include <syslog.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 int main(int argc, char *argv[]) {
     // check if the correct number of arguments is provided
@@ -27,10 +32,17 @@ int main(int argc, char *argv[]) {
     char *text = argv[2];
 
     FILE *file = fopen(path, "w");
+    fprintf(file, "%s", text);
 
     if (file == NULL) {
-        printf
+        printf("error writing file");
+        fclose(file);
+        return 2;
     }
+
+    // close the file
+    fclose(file);
+    printf("File written to %s successfully.\n", path);
 
     return 0;
 }
