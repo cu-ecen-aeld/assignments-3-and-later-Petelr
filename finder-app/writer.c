@@ -16,15 +16,20 @@ file could not be created.
 */
 #include <stdio.h>
 #include <syslog.h>
+#include <stdlib.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
 int main(int argc, char *argv[]) {
+
+    openlog("Z-Writer", LOG_PID, LOG_USER);
+
     // check if the correct number of arguments is provided
     if (argc != 3) {
         printf("Usage: %s <path-including_filename> <text-to-be-written>\n", argv[0]);
+        syslog(LOG_ERR, "Invalid number of arguments.");
         return 1; //Return an error code
     }
 
@@ -34,8 +39,10 @@ int main(int argc, char *argv[]) {
     FILE *file = fopen(path, "w");
     fprintf(file, "%s", text);
 
+    // return error code if failed to write file
     if (file == NULL) {
         printf("error writing file");
+        syslog(LOG_ERR, "Had an issue writing to %s", path);
         fclose(file);
         return 2;
     }
@@ -43,6 +50,9 @@ int main(int argc, char *argv[]) {
     // close the file
     fclose(file);
     printf("File written to %s successfully.\n", path);
+
+    syslog(LOG_DEBUG, "Writing %s to %s.\n", text, path);
+    closelog();
 
     return 0;
 }
